@@ -2,16 +2,22 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./index");
 var jasmine_util = require("@tensorflow/tfjs-core/dist/jasmine_util");
+Error.stackTraceLimit = Infinity;
 var jasmineCtor = require('jasmine');
-jasmine_util.setBeforeAll(function () { });
-jasmine_util.setAfterAll(function () { });
-jasmine_util.setBeforeEach(function () { });
-jasmine_util.setAfterEach(function () { });
-jasmine_util.setTestEnvFeatures([{ BACKEND: 'tensorflow' }]);
+var bindings = require("bindings");
+var nodejs_kernel_backend_1 = require("./nodejs_kernel_backend");
+jasmine_util.setTestBackends([{
+        name: 'test-tensorflow',
+        factory: function () {
+            return new nodejs_kernel_backend_1.NodeJSKernelBackend(bindings('tfjs_binding.node'));
+        },
+        priority: 100
+    }]);
 var IGNORE_LIST = [
     'depthwiseConv2D',
     'separableConv2d',
     'IORouterRegistry',
+    'unsortedSegmentSum', 'gather {} gradient',
     'arrayBufferToBase64String', 'stringByteLength'
 ];
 var runner = new jasmineCtor();
@@ -30,3 +36,4 @@ env.specFilter = function (spec) {
     return true;
 };
 runner.execute();
+//# sourceMappingURL=run_tests.js.map

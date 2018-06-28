@@ -14,3 +14,4 @@ tfc.io.registerSaveRouter(file_system_1.nodeFileSystemRouter);
 tfc.io.registerLoadRouter(file_system_1.nodeFileSystemRouter);
 var version_1 = require("./version");
 exports.version = version_1.version;
+//# sourceMappingURL=index.js.map

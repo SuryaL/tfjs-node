@@ -31,6 +31,7 @@ export declare class NodeJSKernelBackend implements KernelBackend {
     realDivide(a: Tensor<Rank>, b: Tensor<Rank>): Tensor<Rank>;
     floorDiv(a: Tensor<Rank>, b: Tensor<Rank>): Tensor<Rank>;
     divide(a: Tensor, b: Tensor): Tensor;
+    unsortedSegmentSum<T extends Tensor>(x: T, segmentIds: Tensor1D, numSegments: number): Tensor;
     sum(x: Tensor, axes: number[]): Tensor;
     argMin(x: Tensor, axis: number): Tensor;
     argMax(x: Tensor, axis: number): Tensor;

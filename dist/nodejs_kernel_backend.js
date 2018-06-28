@@ -119,9 +119,7 @@ var NodeJSKernelBackend = (function () {
         var outputMetadata = this.binding.executeOp(name, opAttrs, this.getInputTensorIds(inputs), numOutputs);
         return outputMetadata.map(function (m) { return _this.createOutputTensor(m); });
     };
-    NodeJSKernelBackend.prototype.dispose = function () {
-        throw new Error('Method not implemented.');
-    };
+    NodeJSKernelBackend.prototype.dispose = function () { };
     NodeJSKernelBackend.prototype.read = function (dataId) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -236,6 +234,14 @@ var NodeJSKernelBackend = (function () {
     NodeJSKernelBackend.prototype.divide = function (a, b) {
         var opAttrs = [this.createTypeOpAttr('T', types_1.upcastType(a.dtype, b.dtype))];
         return this.executeSingleOutput('Div', opAttrs, [a, b]);
+    };
+    NodeJSKernelBackend.prototype.unsortedSegmentSum = function (x, segmentIds, numSegments) {
+        var opAttrs = [
+            this.createTypeOpAttr('T', x.dtype),
+            this.createTypeOpAttr('Tindices', 'int32'),
+            this.createTypeOpAttr('Tnumsegments', 'int32')
+        ];
+        return this.executeSingleOutput('UnsortedSegmentSum', opAttrs, [x, segmentIds, tfjs_core_1.scalar(numSegments, 'int32')]);
     };
     NodeJSKernelBackend.prototype.sum = function (x, axes) {
         var axisTensor = tfjs_core_1.tensor1d(axes, 'int32');
@@ -822,7 +828,32 @@ var NodeJSKernelBackend = (function () {
         return this.executeSingleOutput('Cumsum', opAttrs, [x, axisTensor]);
     };
     NodeJSKernelBackend.prototype.fromPixels = function (pixels, numChannels) {
-        throw new Error('Method not implemented.');
+        if (pixels == null) {
+            throw new Error('pixels passed to tf.fromPixels() can not be null');
+        }
+        if (pixels.getContext == null) {
+            throw new Error('When running in node, pixels must be an HTMLCanvasElement ' +
+                'like the one returned by the `canvas` npm package');
+        }
+        var vals = pixels
+            .getContext('2d')
+            .getImageData(0, 0, pixels.width, pixels.height)
+            .data;
+        var values;
+        if (numChannels === 4) {
+            values = new Int32Array(vals);
+        }
+        else {
+            var numPixels = pixels.width * pixels.height;
+            values = new Int32Array(numPixels * numChannels);
+            for (var i = 0; i < numPixels; i++) {
+                for (var channel = 0; channel < numChannels; ++channel) {
+                    values[i * numChannels + channel] = vals[i * 4 + channel];
+                }
+            }
+        }
+        var outShape = [pixels.height, pixels.width, numChannels];
+        return tfjs_core_1.tensor3d(values, outShape, 'int32');
     };
     NodeJSKernelBackend.prototype.memory = function () {
         return { unreliable: true };
@@ -844,3 +875,4 @@ var NodeJSKernelBackend = (function () {
     return NodeJSKernelBackend;
 }());
 exports.NodeJSKernelBackend = NodeJSKernelBackend;
+//# sourceMappingURL=nodejs_kernel_backend.js.map
